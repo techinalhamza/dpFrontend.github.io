@@ -46,6 +46,7 @@
         margin-left: 270px;
         padding: 20px;
         width: calc(100% - 270px);
+        position: relative;
       }
       .card {
         border: 1px solid #ddd;
@@ -122,6 +123,72 @@
         max-width: 600px;
         width: 80%;
         text-align: center;
+      }
+
+      div#designerDetailsModal {
+        position: absolute;
+        top: 0px;
+        left: 50%;
+        transform: translate(-50%, 50%);
+        box-shadow: 0 4px 25px 100rem rgba(0, 0, 0, 0.1);
+        border-radius: 20px;
+      }
+
+      div#templateModal {
+        display: none; /* Hidden by default, use JavaScript to toggle */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8); /* Adds overlay effect */
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-content {
+        width: 90%;
+        max-width: 600px;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        position: relative;
+        color: #000;
+        background: #fff;
+        text-align: center;
+      }
+      #closeModal {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: #daa520;
+        border-radius: 50px;
+        color: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      img#largeImage {
+        width: 50% !important;
+      }
+
+      div#imageThumbnails img {
+        width: 80px;
+        height: 80px;
+      }
+      .modal-content-details {
+        text-align: left;
+      }
+
+      .upc-box {
+        display: flex;
+        justify-content: space-between;
       }
     </style>
   </head>
@@ -226,28 +293,7 @@
       <!-- Template Details Modal -->
       <div id="templateModal" style="display: none">
         <div class="modal-content">
-          <button id="closeModal" onclick="closeTemplateModal()">Close</button>
-          <h3 id="modalDescription"></h3>
-          <p>Status: <span id="modalStatus"></span></p>
-          <p>Sales Count: <span id="modalSalesCount"></span></p>
-          <p>UPC: <span id="assignedUpc"></span></p>
-
-          <!-- UPC Input Field and Buttons -->
-          <input
-            type="text"
-            id="editUpcInput"
-            style="display: none"
-            placeholder="Enter new UPC"
-          />
-          <button
-            id="saveUpcButton"
-            style="display: none"
-            onclick="saveUpcCode()"
-          >
-            Save UPC
-          </button>
-          <button id="editUpcButton" onclick="enableUpcEdit()">Edit UPC</button>
-
+          <span id="closeModal" onclick="closeTemplateModal()">Close</span>
           <!-- Image Section -->
           <img
             id="largeImage"
@@ -257,48 +303,49 @@
           />
           <div
             id="imageThumbnails"
-            style="display: flex; gap: 10px; margin-top: 20px"
+            style="
+              display: flex;
+              gap: 10px;
+              margin-top: 20px;
+              justify-content: center;
+            "
           ></div>
+          <div class="modal-content-details">
+            <h3 id="modalDescription"></h3>
+            <p>Status: <span id="modalStatus"></span></p>
+            <p>Sales Count: <span id="modalSalesCount"></span></p>
+            <div class="upc-box">
+              <div style="display: flex">
+                <p>UPC: <span id="assignedUpc"></span></p>
 
-          <!-- Approve/Reject Buttons -->
-          <div style="margin-top: 20px">
-            <button id="approveButton">Approve</button>
-            <button id="rejectButton" class="reject">Reject</button>
+                <!-- UPC Input Field and Buttons -->
+                <input
+                  type="text"
+                  id="editUpcInput"
+                  style="display: none"
+                  placeholder="Enter new UPC"
+                />
+              </div>
+              <button
+                id="saveUpcButton"
+                style="display: none"
+                onclick="saveUpcCode()"
+              >
+                Save UPC
+              </button>
+              <button id="editUpcButton" onclick="enableUpcEdit()">
+                Edit UPC
+              </button>
+            </div>
+
+            <!-- Approve/Reject Buttons -->
+            <div style="margin-top: 20px">
+              <button id="approveButton">Approve</button>
+              <button id="rejectButton" class="reject">Reject</button>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- <div id="templateModal" style="display: none">
-        <div class="modal-content">
-          <button id="closeModal" onclick="closeTemplateModal()">Close</button>
-          <h3 id="modalDescription"></h3>
-          <p>Status: <span id="modalStatus"></span></p>
-          <p>Sales Count: <span id="modalSalesCount"></span></p>
-
-          UPC input and edit button in your modal
-          <label for="upcInput" id="upcLabel">Assign UPC Code:</label>
-          <input type="text" id="upcInput" placeholder="Enter UPC code here" />
-          <p>Assigned UPC: <span id="assignedUpc"></span></p>
-          <button id="editUpcButton" style="display: none">Edit UPC</button>
-
-          <img
-            id="largeImage"
-            src=""
-            style="width: 10%; height: auto"
-            alt="Large Image"
-          />
-          <div
-            id="imageThumbnails"
-            style="display: flex; gap: 10px; margin-top: 20px; width: 10%"
-          ></div>
-
-          Approve/Reject Buttons
-          <div style="margin-top: 20px">
-            <button id="approveButton">Approve</button>
-            <button id="rejectButton" class="reject">Reject</button>
-          </div>
-        </div>
-      </div> -->
 
       <!-- Sales Reports Section -->
       <div id="sales" class="section">
