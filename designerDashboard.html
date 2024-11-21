@@ -399,7 +399,8 @@
       button {
         width: 100%;
         padding: 15px;
-        font-size: 1.2rem;
+        font-size: 12px;
+        text-wrap-mode: nowrap;
         font-weight: bold;
         color: #fff;
         background-color: #daa529;
@@ -465,7 +466,8 @@
       button {
         width: 100%;
         padding: 15px;
-        font-size: 1.2rem;
+        font-size: 12px;
+        text-wrap-mode: nowrap;
         font-weight: bold;
         color: #fff;
         background-color: #daa529;
@@ -685,6 +687,58 @@
         font-style: italic;
         color: #000;
       } */
+      /* ==================================================================================== */
+      /* template section */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-family: "Roboto", sans-serif;
+        font-size: 1rem;
+        text-align: left;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      thead {
+        background-color: #daa529;
+        color: #fff;
+      }
+
+      thead th {
+        padding: 10px 15px;
+        text-transform: uppercase;
+      }
+
+      tbody tr {
+        border-bottom: 1px solid #ddd;
+      }
+
+      tbody td {
+        padding: 15px;
+      }
+
+      tbody td img {
+        border-radius: 5px;
+      }
+
+      tbody td button {
+        padding: 8px 12px;
+        background-color: #daa529;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+        text-wrap-mode: nowrap;
+      }
+
+      tbody td button:hover {
+        background-color: #c99426;
+      }
+
+      /* ==================================================================================== */
     </style>
   </head>
   <body>
@@ -865,11 +919,26 @@
         </div> -->
 
         <!-- Uploaded Templates Section -->
-        <div id="templates-section" class="section">
+        <!-- <div id="templates-section" class="section">
           <h2>Your Uploaded Templates</h2>
           <div id="templateList"></div>
+        </div> -->
+        <div id="templates-section" class="section">
+          <h2>Your Uploaded Templates</h2>
+          <table id="templatesTable">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>UPC</th>
+                <!-- <th>Uploaded On</th> -->
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="templateList"></tbody>
+          </table>
         </div>
-
         <!-- Sales Tracking Section -->
         <div id="sales-section" class="section">
           <h2>Sales Track</h2>
@@ -1168,43 +1237,6 @@
           }
         }
 
-        // Function to check user input
-        // function checkForUserInput() {
-        //   const description = document
-        //     .getElementById("description")
-        //     .value.trim();
-        //   const images = document.querySelectorAll(".images").files;
-
-        //   // If any input is detected, fetch SKU
-        //   if ((description || images.length > 0) && !skuGenerated) {
-        //     fetchSkuFromBackend();
-        //   }
-        // }
-
-        // Event listeners to trigger SKU generation
-        // document
-        //   .getElementById("description")
-        //   .addEventListener("input", checkForUserInput());
-        // document
-        //   .querySelectorAll(".images")
-        //   .addEventListener("click", checkForUserInput());
-
-        // Handle image preview
-        // imageInputs.forEach((input, index) => {
-        //   input.addEventListener("change", function () {
-        //     const file = input.files[0];
-        //     if (file) {
-        //       const reader = new FileReader();
-        //       reader.onload = function (e) {
-        //         imagePreviews[index].src = e.target.result;
-        //         imagePreviews[index].style.display = "block";
-        //       };
-        //       reader.readAsDataURL(file);
-        //       checkForUserInput();
-        //     }
-        //   });
-        // });
-
         // Handle form submission for uploading a new template
         document
           .getElementById("templateForm")
@@ -1260,6 +1292,14 @@
                 alert(result.message);
                 loadTemplates();
                 document.getElementById("templateForm").reset();
+                document.getElementById("skuPlaceholder").textContent =
+                  "Generating SKU...";
+                document.getElementById("hiddenSku").value = "";
+                skuGenerated = false; // Reset SKU generation flag
+                imagePreviews.forEach((preview) => {
+                  preview.src = ""; // Clear the image preview
+                  preview.style.display = "none"; // Hide the preview
+                });
               } else {
                 alert(result.message || "Failed to upload template.");
               }
@@ -1290,51 +1330,125 @@
 
         // Display templates in the "Uploaded Templates" section
         function displayTemplates(templates) {
-          // console.log(templates);
           const templateList = document.getElementById("templateList");
-          templateList.innerHTML = "";
+          templateList.innerHTML = ""; // Clear previous data
 
           templates.forEach((template) => {
-            // console.log(template);
-            const card = document.createElement("div");
-            card.classList.add("template-card");
+            // Create table row
+            const row = document.createElement("tr");
 
-            // Display the first image as a thumbnail
+            // Image cell
+            const imgCell = document.createElement("td");
             const img = document.createElement("img");
             img.src = template.images[0] || "https://via.placeholder.com/100";
-            card.appendChild(img);
+            img.style.width = "60px";
+            img.style.height = "60px";
+            img.style.borderRadius = "5px";
+            imgCell.appendChild(img);
+            row.appendChild(imgCell);
 
-            const details = document.createElement("div");
-            details.classList.add("template-details");
+            // Description cell with truncated text
+            const descriptionCell = document.createElement("td");
+            const truncatedDescription = truncateText(
+              template.description,
+              200
+            ); // Limit to 100 characters
+            descriptionCell.textContent = truncatedDescription;
+            row.appendChild(descriptionCell);
 
-            // Template description
-            const description = document.createElement("p");
-            description.textContent = `Description: ${template.description}`;
-            details.appendChild(description);
+            // Status cell
+            const statusCell = document.createElement("td");
+            statusCell.textContent = template.status;
+            row.appendChild(statusCell);
 
-            // Template status
-            const status = document.createElement("p");
-            status.textContent = `Status: ${template.status}`;
-            details.appendChild(status);
-            // upc code
-            const upc = document.createElement("p");
-            upc.textContent = `UPC: ${template.upc || "Admin will assign"}`;
-            details.appendChild(upc);
+            // UPC cell
+            const upcCell = document.createElement("td");
+            upcCell.textContent = template.upc || "Admin will assign";
+            row.appendChild(upcCell);
 
-            // Upload time
-            const uploadTime = document.createElement("p");
-            uploadTime.textContent = `Uploaded on: ${new Date(
-              template.createdAt
-            ).toLocaleString()}`;
-            details.appendChild(uploadTime);
+            // Upload time cell
+            // const uploadTimeCell = document.createElement("td");
+            // uploadTimeCell.textContent = new Date(
+            //   template.createdAt
+            // ).toLocaleString();
+            // row.appendChild(uploadTimeCell);
 
-            card.appendChild(details);
-            templateList.appendChild(card);
+            // Action cell
+            const actionCell = document.createElement("td");
+            const viewDetailsButton = document.createElement("button");
+            viewDetailsButton.textContent = "View Details";
+            viewDetailsButton.style.padding = "10px 15px";
+            viewDetailsButton.style.backgroundColor = "#daa529";
+            viewDetailsButton.style.color = "#fff";
+            viewDetailsButton.style.border = "none";
+            viewDetailsButton.style.borderRadius = "5px";
+            viewDetailsButton.style.cursor = "pointer";
 
-            // Open modal on click
-            card.addEventListener("click", () => openModal(template));
+            // Add modal functionality to button
+            viewDetailsButton.addEventListener("click", () =>
+              openModal(template)
+            );
+            actionCell.appendChild(viewDetailsButton);
+            row.appendChild(actionCell);
+
+            // Append row to table
+            templateList.appendChild(row);
           });
+
+          // Utility function to truncate text
+          function truncateText(text, maxLength) {
+            return text.length > maxLength
+              ? text.substr(0, maxLength) + "..."
+              : text;
+          }
         }
+
+        // function displayTemplates(templates) {
+        //   // console.log(templates);
+        //   const templateList = document.getElementById("templateList");
+        //   templateList.innerHTML = "";
+
+        //   templates.forEach((template) => {
+        //     // console.log(template);
+        //     const card = document.createElement("div");
+        //     card.classList.add("template-card");
+
+        //     // Display the first image as a thumbnail
+        //     const img = document.createElement("img");
+        //     img.src = template.images[0] || "https://via.placeholder.com/100";
+        //     card.appendChild(img);
+
+        //     const details = document.createElement("div");
+        //     details.classList.add("template-details");
+
+        //     // Template description
+        //     const description = document.createElement("p");
+        //     description.textContent = `Description: ${template.description}`;
+        //     details.appendChild(description);
+
+        //     // Template status
+        //     const status = document.createElement("p");
+        //     status.textContent = `Status: ${template.status}`;
+        //     details.appendChild(status);
+        //     // upc code
+        //     const upc = document.createElement("p");
+        //     upc.textContent = `UPC: ${template.upc || "Admin will assign"}`;
+        //     details.appendChild(upc);
+
+        //     // Upload time
+        //     const uploadTime = document.createElement("p");
+        //     uploadTime.textContent = `Uploaded on: ${new Date(
+        //       template.createdAt
+        //     ).toLocaleString()}`;
+        //     details.appendChild(uploadTime);
+
+        //     card.appendChild(details);
+        //     templateList.appendChild(card);
+
+        //     // Open modal on click
+        //     card.addEventListener("click", () => openModal(template));
+        //   });
+        // }
 
         // Open modal with template details
         function openModal(template) {

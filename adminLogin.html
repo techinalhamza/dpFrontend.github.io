@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Login</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css"
+      integrity="sha512-9xKTRVabjVeZmc+GUW8GgSmcREDunMM+Dt/GrzchfN8tkwHizc5RP4Ok/MXFFy5rIjJjzhndFScTceq5e6GvVQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <style>
       body {
         font-family: "Roboto", sans-serif;
@@ -58,6 +65,19 @@
         border: 2px solid #daa529;
         outline: none;
       }
+      .password-container {
+        position: relative;
+      }
+      .password-toggle {
+        position: absolute;
+        right: 10px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: #daa529;
+        top: 0%;
+        right: 0;
+        transform: translate(-50%, 80%);
+      }
 
       button {
         width: 100%;
@@ -108,13 +128,34 @@
       <form id="adminLoginForm">
         <label>Username</label>
         <input type="text" id="username" required />
+        <!-- <label>Password</label>
+        <input type="password" id="password" required /> -->
+
         <label>Password</label>
-        <input type="password" id="password" required />
+        <div class="password-container">
+          <input type="password" id="password" required />
+          <i class="fas fa-eye password-toggle" onclick="togglePassword()"></i>
+        </div>
         <button type="submit">Login</button>
       </form>
     </div>
 
     <script>
+      // Toggle password visibility
+      function togglePassword() {
+        const passwordField = document.getElementById("password");
+        const toggleIcon = document.querySelector(".password-toggle");
+
+        if (passwordField.type === "password") {
+          passwordField.type = "text";
+          toggleIcon.classList.remove("fa-eye");
+          toggleIcon.classList.add("fa-eye-slash");
+        } else {
+          passwordField.type = "password";
+          toggleIcon.classList.remove("fa-eye-slash");
+          toggleIcon.classList.add("fa-eye");
+        }
+      }
       document
         .getElementById("adminLoginForm")
         .addEventListener("submit", async function (event) {
