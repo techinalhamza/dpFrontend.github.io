@@ -241,9 +241,6 @@
         justify-content: center;
         align-items: center;
       }
-      img#largeImage {
-        width: 52% !important;
-      }
 
       /* .modal-content {
         background: #fff;
@@ -325,7 +322,7 @@
         color: #daa529;
         font-size: 2rem;
         /* text-align: center; */
-        margin-bottom: 20px;
+        margin-bottom: 0;
         text-transform: uppercase;
       }
 
@@ -552,7 +549,8 @@
       }
 
       img#largeImage {
-        width: 70%; /* Ensures the image is prominently displayed */
+        width: 52% !important; /* Ensures the image is prominently displayed */
+        aspect-ratio: 4/4;
         max-width: 400px;
         margin: 20px auto;
         border-radius: 10px;
@@ -707,7 +705,7 @@
       }
 
       thead th {
-        padding: 10px 15px;
+        padding: 20px 15px;
         text-transform: uppercase;
       }
 
@@ -716,7 +714,7 @@
       }
 
       tbody td {
-        padding: 15px;
+        padding: 30px 15px;
       }
 
       tbody td img {
@@ -767,7 +765,7 @@
           style="
             position: relative;
 
-            display: flex;
+            display: none;
             justify-content: end;
             width: 15%;
             margin-left: auto;
@@ -997,7 +995,7 @@
     <!-- Modal for Viewing Template Details -->
     <div id="templateModal">
       <div class="modal-content">
-        <span id="closeModal">Close</span>
+        <span id="closeModal"><i class="fa-regular fa-circle-xmark"></i></span>
         <img
           id="largeImage"
           src=""
@@ -1714,6 +1712,102 @@
           }
         });
 
+        async function loadPaymentDetails() {
+          try {
+            const response = await fetch(
+              "http://localhost:3000/designer/payment-info",
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`, // Use the token from localStorage
+                },
+              }
+            );
+            console.log(await response.text());
+
+            if (response.ok) {
+              const text = await response.text();
+              if (!text) {
+                console.error("Empty response body.");
+                return;
+              }
+              const paymentInfo = await response.json();
+
+              // Check if existing details already exist and remove them
+              const existingDetails = document.getElementById(
+                "existingPaymentDetails"
+              );
+              if (existingDetails) {
+                existingDetails.remove();
+              }
+
+              // Display the existing payment details
+              const paymentDetailsContainer = document.createElement("div");
+              paymentDetailsContainer.id = "existingPaymentDetails";
+              paymentDetailsContainer.innerHTML = `
+        <h3>Your Current Payment Details:</h3>
+        ${
+          paymentInfo.paypal_email
+            ? `<p>PayPal Email: ${paymentInfo.paypal_email}</p>`
+            : ""
+        }
+        ${
+          paymentInfo.venmo_username
+            ? `<p>Venmo Username: ${paymentInfo.venmo_username}</p>`
+            : ""
+        }
+        ${
+          paymentInfo.cashapp_username
+            ? `<p>CashApp Username: ${paymentInfo.cashapp_username}</p>`
+            : ""
+        }
+      `;
+
+              // Insert the details above the form
+              const paymentSection = document.getElementById("payment-section");
+              paymentSection.insertBefore(
+                paymentDetailsContainer,
+                paymentSection.querySelector("form")
+              );
+
+              // Populate fields for editing if needed
+              const paymentMethodSelect =
+                document.getElementById("payment_method");
+              document
+                .querySelectorAll(".conditional-field")
+                .forEach((field) => {
+                  field.style.display = "none";
+                });
+
+              if (paymentInfo.paypal_email) {
+                paymentMethodSelect.value = "paypal";
+                document.getElementById("paypal-info").style.display = "block";
+                document.getElementById("paypal_email").value =
+                  paymentInfo.paypal_email;
+              } else if (paymentInfo.venmo_username) {
+                paymentMethodSelect.value = "venmo";
+                document.getElementById("venmo-info").style.display = "block";
+                document.getElementById("venmo_username").value =
+                  paymentInfo.venmo_username;
+              } else if (paymentInfo.cashapp_username) {
+                paymentMethodSelect.value = "cashapp";
+                document.getElementById("cashapp-info").style.display = "block";
+                document.getElementById("cashapp_username").value =
+                  paymentInfo.cashapp_username;
+              }
+            } else {
+              console.error(
+                "Failed to fetch payment details:",
+                response.statusText
+              );
+            }
+          } catch (error) {
+            console.error("Error fetching payment details:", error);
+          }
+        }
+
+        // loadPaymentDetails();
         // Handle form submission
         paymentForm.addEventListener("submit", async function (event) {
           event.preventDefault();
@@ -1741,6 +1835,15 @@
             const result = await response.json();
             if (response.ok) {
               alert(result.message);
+              // Refresh payment details after update
+
+              const existingDetails = document.getElementById(
+                "existingPaymentDetails"
+              );
+              if (existingDetails) {
+                existingDetails.remove();
+              }
+              loadPaymentDetails();
             } else {
               alert(result.message || "Failed to update payment information.");
             }
@@ -1749,6 +1852,41 @@
             alert("Error updating payment information. Please try again.");
           }
         });
+
+        // paymentForm.addEventListener("submit", async function (event) {
+        //   event.preventDefault();
+
+        //   const formData = {
+        //     payment_method: paymentMethodSelect.value,
+        //     paypal_email: document.getElementById("paypal_email").value,
+        //     venmo_username: document.getElementById("venmo_username").value,
+        //     cashapp_username: document.getElementById("cashapp_username").value,
+        //   };
+
+        //   try {
+        //     const response = await fetch(
+        //       "http://localhost:3000/designer/update-payment-info",
+        //       {
+        //         method: "PUT",
+        //         headers: {
+        //           "Content-Type": "application/json",
+        //           Authorization: `Bearer ${token}`,
+        //         },
+        //         body: JSON.stringify(formData),
+        //       }
+        //     );
+
+        //     const result = await response.json();
+        //     if (response.ok) {
+        //       alert(result.message);
+        //     } else {
+        //       alert(result.message || "Failed to update payment information.");
+        //     }
+        //   } catch (error) {
+        //     console.error("Error updating payment information:", error);
+        //     alert("Error updating payment information. Please try again.");
+        //   }
+        // });
         async function loadPayments() {
           paymentsData = await fetchData(
             "http://localhost:3000/admin/payments"
