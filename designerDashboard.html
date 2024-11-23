@@ -1724,83 +1724,76 @@
                 },
               }
             );
-            console.log(await response.text());
 
-            if (response.ok) {
-              const text = await response.text();
-              if (!text) {
-                console.error("Empty response body.");
-                return;
-              }
-              const paymentInfo = await response.json();
-
-              // Check if existing details already exist and remove them
-              const existingDetails = document.getElementById(
-                "existingPaymentDetails"
-              );
-              if (existingDetails) {
-                existingDetails.remove();
-              }
-
-              // Display the existing payment details
-              const paymentDetailsContainer = document.createElement("div");
-              paymentDetailsContainer.id = "existingPaymentDetails";
-              paymentDetailsContainer.innerHTML = `
-        <h3>Your Current Payment Details:</h3>
-        ${
-          paymentInfo.paypal_email
-            ? `<p>PayPal Email: ${paymentInfo.paypal_email}</p>`
-            : ""
-        }
-        ${
-          paymentInfo.venmo_username
-            ? `<p>Venmo Username: ${paymentInfo.venmo_username}</p>`
-            : ""
-        }
-        ${
-          paymentInfo.cashapp_username
-            ? `<p>CashApp Username: ${paymentInfo.cashapp_username}</p>`
-            : ""
-        }
-      `;
-
-              // Insert the details above the form
-              const paymentSection = document.getElementById("payment-section");
-              paymentSection.insertBefore(
-                paymentDetailsContainer,
-                paymentSection.querySelector("form")
-              );
-
-              // Populate fields for editing if needed
-              const paymentMethodSelect =
-                document.getElementById("payment_method");
-              document
-                .querySelectorAll(".conditional-field")
-                .forEach((field) => {
-                  field.style.display = "none";
-                });
-
-              if (paymentInfo.paypal_email) {
-                paymentMethodSelect.value = "paypal";
-                document.getElementById("paypal-info").style.display = "block";
-                document.getElementById("paypal_email").value =
-                  paymentInfo.paypal_email;
-              } else if (paymentInfo.venmo_username) {
-                paymentMethodSelect.value = "venmo";
-                document.getElementById("venmo-info").style.display = "block";
-                document.getElementById("venmo_username").value =
-                  paymentInfo.venmo_username;
-              } else if (paymentInfo.cashapp_username) {
-                paymentMethodSelect.value = "cashapp";
-                document.getElementById("cashapp-info").style.display = "block";
-                document.getElementById("cashapp_username").value =
-                  paymentInfo.cashapp_username;
-              }
-            } else {
+            if (!response.ok) {
               console.error(
                 "Failed to fetch payment details:",
                 response.statusText
               );
+              return;
+            }
+
+            const paymentInfo = await response.json();
+
+            // Check if existing details already exist and remove them
+            const existingDetails = document.getElementById(
+              "existingPaymentDetails"
+            );
+            if (existingDetails) {
+              existingDetails.remove();
+            }
+
+            // Display the existing payment details
+            const paymentDetailsContainer = document.createElement("div");
+            paymentDetailsContainer.id = "existingPaymentDetails";
+            paymentDetailsContainer.innerHTML = `
+      <h3>Your Current Payment Details:</h3>
+      ${
+        paymentInfo.paypal_email
+          ? `<p>PayPal Email: ${paymentInfo.paypal_email}</p>`
+          : ""
+      }
+      ${
+        paymentInfo.venmo_username
+          ? `<p>Venmo Username: ${paymentInfo.venmo_username}</p>`
+          : ""
+      }
+      ${
+        paymentInfo.cashapp_username
+          ? `<p>CashApp Username: ${paymentInfo.cashapp_username}</p>`
+          : ""
+      }
+    `;
+
+            // Insert the details above the form
+            const paymentSection = document.getElementById("payment-section");
+            paymentSection.insertBefore(
+              paymentDetailsContainer,
+              paymentSection.querySelector("form")
+            );
+
+            // Populate fields for editing if needed
+            const paymentMethodSelect =
+              document.getElementById("payment_method");
+            document.querySelectorAll(".conditional-field").forEach((field) => {
+              field.style.display = "none";
+            });
+
+            if (paymentInfo.paypal_email) {
+              paymentMethodSelect.value = "paypal";
+              document.getElementById("paypal-info").style.display = "block";
+              document.getElementById("paypal_email").value =
+                paymentInfo.paypal_email;
+            } else if (paymentInfo.venmo_username) {
+              paymentMethodSelect.value = "venmo";
+              document.getElementById("venmo-info").style.display = "block";
+              document.getElementById("venmo_username").value =
+                paymentInfo.venmo_username;
+            } else if (paymentInfo.cashapp_username) {
+              paymentMethodSelect.value = "cashapp";
+              document.getElementById("cashapp-info").style.display = "block";
+              document.getElementById("cashapp_username").value =
+                paymentInfo.cashapp_username;
             }
           } catch (error) {
             console.error("Error fetching payment details:", error);
